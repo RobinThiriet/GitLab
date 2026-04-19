@@ -1,0 +1,9 @@
+stages:
+  - test
+
+hello-ci:
+  stage: test
+  image: alpine:3.20
+  script:
+    - echo "CI/CD GitLab fonctionne"
+    - uname -a
