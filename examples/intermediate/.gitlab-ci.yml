@@ -1,0 +1,63 @@
+stages:
+  - lint
+  - test
+  - build
+  - package
+  - deploy
+
+variables:
+  APP_NAME: "demo-app"
+  BUILD_DIR: "dist"
+
+default:
+  image: alpine:3.20
+  before_script:
+    - echo "Projet: ${APP_NAME}"
+    - mkdir -p "${BUILD_DIR}"
+
+lint:
+  stage: lint
+  script:
+    - echo "Analyse statique simplifiee"
+    - test -f README.md
+
+test:
+  stage: test
+  script:
+    - echo "Execution des tests"
+    - echo "tests=ok" > test-report.txt
+  artifacts:
+    paths:
+      - test-report.txt
+    expire_in: 1 day
+
+build:
+  stage: build
+  script:
+    - echo "Construction de l'application"
+    - echo "build for ${APP_NAME}" > "${BUILD_DIR}/app.txt"
+  artifacts:
+    paths:
+      - "${BUILD_DIR}/"
+    expire_in: 1 day
+
+package:
+  stage: package
+  script:
+    - echo "Preparation du package"
+    - test -f "${BUILD_DIR}/app.txt"
+    - cp "${BUILD_DIR}/app.txt" package.txt
+  artifacts:
+    paths:
+      - package.txt
+    expire_in: 1 day
+
+deploy-dev:
+  stage: deploy
+  script:
+    - echo "Simulation d'un deploiement sur dev"
+    - echo "deployed ${APP_NAME} to dev"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never

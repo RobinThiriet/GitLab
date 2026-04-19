@@ -16,6 +16,7 @@ Les documents complementaires sont disponibles dans :
 
 - [docs/ARCHITECTURE.md](/root/GitLab/docs/ARCHITECTURE.md)
 - [docs/RUNBOOK.md](/root/GitLab/docs/RUNBOOK.md)
+- [docs/LEARNING-PATH.md](/root/GitLab/docs/LEARNING-PATH.md)
 
 ## Objectifs pedagogiques
 
@@ -88,7 +89,8 @@ docker compose version
 ├── docs/
 │   └── ARCHITECTURE.md
 ├── examples/
-│   └── basic/.gitlab-ci.yml
+│   ├── basic/.gitlab-ci.yml
+│   └── intermediate/.gitlab-ci.yml
 ├── scripts/
 │   └── register-runner.sh
 └── templates/
@@ -197,6 +199,17 @@ Parcours conseille pour apprendre :
 4. tester les `stages`
 5. tester les `artifacts`
 6. tester les `rules`
+
+Un exemple plus complet est aussi disponible dans [examples/intermediate/.gitlab-ci.yml](/root/GitLab/examples/intermediate/.gitlab-ci.yml).
+
+Il montre :
+
+- plusieurs `stages`
+- des `artifacts`
+- des variables CI
+- un job de deploiement manuel avec `rules`
+
+Le parcours detaille d'apprentissage est documente dans [docs/LEARNING-PATH.md](/root/GitLab/docs/LEARNING-PATH.md).
 
 ## Commandes utiles
 
