@@ -32,6 +32,20 @@ Les composants internes de GitLab tourent dans le conteneur `gitlab` :
 - `redis`
 - `gitaly`
 
+## Schema global
+
+```mermaid
+flowchart LR
+    User[Utilisateur] --> Browser[Navigateur / Git client]
+    Browser --> GitLab[GitLab CE]
+    GitLab --> Pipeline[Pipeline GitLab]
+    Pipeline --> Runner[GitLab Runner]
+    Runner --> Jobs[Jobs CI/CD]
+    Jobs --> DockerHost[Docker host]
+    DockerHost --> GitLabContainer[Conteneur GitLab]
+    DockerHost --> RunnerContainer[Conteneur Runner]
+```
+
 ## Vue logique
 
 ```text
@@ -67,6 +81,22 @@ Les composants internes de GitLab tourent dans le conteneur `gitlab` :
 +-------------------------------+
 ```
 
+## Vue fonctionnelle CI/CD
+
+```mermaid
+flowchart TD
+    A[Commit] --> B[Push]
+    B --> C[Repository GitLab]
+    C --> D[Lecture de .gitlab-ci.yml]
+    D --> E[Pipeline]
+    E --> F[Stage lint]
+    E --> G[Stage test]
+    E --> H[Stage build]
+    H --> I[Artifact]
+    I --> J[Stage deploy]
+    J --> K[Application cible]
+```
+
 ## Vue reseau
 
 Ports exposes sur l'hote :
@@ -82,6 +112,14 @@ Flux :
 3. `nginx` transmet a `puma/rails`
 4. Rails lit et ecrit dans PostgreSQL, Redis et Gitaly
 5. les pipelines sont distribues au runner
+
+Dans le cas d'un deploiement applicatif par CI/CD :
+
+1. GitLab construit le pipeline
+2. le runner recupere le job de deploy
+3. le job pilote Docker sur l'hote cible
+4. les conteneurs applicatifs sont demarres
+5. un controle post-deploiement valide l'exposition de l'application
 
 ## Vue stockage
 

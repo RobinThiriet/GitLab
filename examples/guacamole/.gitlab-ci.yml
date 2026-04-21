@@ -1,0 +1,48 @@
+stages:
+  - validate
+  - deploy
+  - verify
+
+variables:
+  COMPOSE_FILE_PATH: examples/guacamole/docker-compose.guacamole.yml
+  COMPOSE_PROJECT_NAME: guacamole-lab
+  GUACAMOLE_HTTP_PORT: "8081"
+  GUACAMOLE_DB_NAME: "guacamole_db"
+  GUACAMOLE_DB_USER: "guacamole_user"
+
+default:
+  image: docker:27-cli
+
+validate-guacamole:
+  stage: validate
+  script:
+    - docker compose --env-file examples/guacamole/.env.example -f "${COMPOSE_FILE_PATH}" config >/dev/null
+
+deploy-guacamole:
+  stage: deploy
+  script:
+    - test -n "${GUACAMOLE_DB_PASSWORD}"
+    - printf "GUACAMOLE_HTTP_PORT=%s\n" "${GUACAMOLE_HTTP_PORT}" > .guacamole.env
+    - printf "GUACAMOLE_DB_NAME=%s\n" "${GUACAMOLE_DB_NAME}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_USER=%s\n" "${GUACAMOLE_DB_USER}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_PASSWORD=%s\n" "${GUACAMOLE_DB_PASSWORD}" >> .guacamole.env
+    - docker compose --env-file .guacamole.env -f "${COMPOSE_FILE_PATH}" up -d
+    - docker compose --env-file .guacamole.env -f "${COMPOSE_FILE_PATH}" ps
+  environment:
+    name: guacamole-lab
+    url: http://localhost:8081
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never
+
+verify-guacamole:
+  stage: verify
+  script:
+    - docker run --rm --network host curlimages/curl:8.8.0 -fsS "http://localhost:${GUACAMOLE_HTTP_PORT}/" >/dev/null
+  needs:
+    - deploy-guacamole
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never

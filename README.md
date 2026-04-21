@@ -17,6 +17,9 @@ Les documents complementaires sont disponibles dans :
 - [docs/ARCHITECTURE.md](/root/GitLab/docs/ARCHITECTURE.md)
 - [docs/RUNBOOK.md](/root/GitLab/docs/RUNBOOK.md)
 - [docs/LEARNING-PATH.md](/root/GitLab/docs/LEARNING-PATH.md)
+- [docs/CI-CD-FOUNDATIONS.md](/root/GitLab/docs/CI-CD-FOUNDATIONS.md)
+- [docs/BEST-PRACTICES.md](/root/GitLab/docs/BEST-PRACTICES.md)
+- [docs/GUACAMOLE-CICD.md](/root/GitLab/docs/GUACAMOLE-CICD.md)
 
 ## Objectifs pedagogiques
 
@@ -66,6 +69,8 @@ Flux principal :
 4. le runner lance un conteneur de job
 5. le resultat remonte dans l'interface GitLab
 
+Une vue plus complete, avec schema et decomposition des flux, est disponible dans [docs/ARCHITECTURE.md](/root/GitLab/docs/ARCHITECTURE.md).
+
 ## Prerequis
 
 - Docker
@@ -87,9 +92,15 @@ docker compose version
 ├── docker-compose.yml
 ├── README.md
 ├── docs/
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   ├── BEST-PRACTICES.md
+│   ├── CI-CD-FOUNDATIONS.md
+│   ├── GUACAMOLE-CICD.md
+│   ├── LEARNING-PATH.md
+│   └── RUNBOOK.md
 ├── examples/
 │   ├── basic/.gitlab-ci.yml
+│   ├── guacamole/
 │   └── intermediate/.gitlab-ci.yml
 ├── scripts/
 │   └── register-runner.sh
@@ -210,6 +221,41 @@ Il montre :
 - un job de deploiement manuel avec `rules`
 
 Le parcours detaille d'apprentissage est documente dans [docs/LEARNING-PATH.md](/root/GitLab/docs/LEARNING-PATH.md).
+
+## Comprendre la CI/CD dans sa globalite
+
+Pour comprendre :
+
+- comment fonctionne une chaine CI/CD
+- comment GitLab, le pipeline et le runner interagissent
+- quelle est la difference entre CI, delivery et deployment
+
+consultez [docs/CI-CD-FOUNDATIONS.md](/root/GitLab/docs/CI-CD-FOUNDATIONS.md).
+
+## Bonnes pratiques globales
+
+Pour avoir une vue d'ensemble sur :
+
+- la structuration des pipelines
+- la gestion des secrets
+- les strategies de deploy
+- les controles post-deploiement
+
+consultez [docs/BEST-PRACTICES.md](/root/GitLab/docs/BEST-PRACTICES.md).
+
+## Cas complet avec Guacamole
+
+Un cas de bout en bout est disponible pour montrer comment deployer une vraie application via GitLab CI/CD :
+
+- [docs/GUACAMOLE-CICD.md](/root/GitLab/docs/GUACAMOLE-CICD.md)
+- [examples/guacamole/README.md](/root/GitLab/examples/guacamole/README.md)
+
+Ce cas montre :
+
+- une stack applicative multi-conteneurs
+- un pipeline GitLab dedie
+- un deploy via runner
+- une verification post-deploiement
 
 ## Commandes utiles
 
