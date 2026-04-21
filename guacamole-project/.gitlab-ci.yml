@@ -1,0 +1,71 @@
+stages:
+  - validate
+  - deploy
+  - verify
+  - cleanup
+
+variables:
+  COMPOSE_FILE_PATH: docker-compose.yml
+  COMPOSE_PROJECT_NAME: guacamole-lab
+  GUACAMOLE_HTTP_PORT: "8081"
+  GUACAMOLE_DB_NAME: "guacamole_db"
+  GUACAMOLE_DB_USER: "guacamole_user"
+  GUACAMOLE_IMAGE_TAG: "1.6.0"
+
+default:
+  image: docker:27-cli
+  before_script:
+    - chmod +x scripts/*.sh
+    - ./scripts/prepare-initdb.sh
+
+validate-guacamole:
+  stage: validate
+  script:
+    - docker compose --env-file .env.example -f "${COMPOSE_FILE_PATH}" config >/dev/null
+
+deploy-guacamole:
+  stage: deploy
+  script:
+    - test -n "${GUACAMOLE_DB_PASSWORD}"
+    - printf "GUACAMOLE_HTTP_PORT=%s\n" "${GUACAMOLE_HTTP_PORT}" > .guacamole.env
+    - printf "GUACAMOLE_DB_NAME=%s\n" "${GUACAMOLE_DB_NAME}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_USER=%s\n" "${GUACAMOLE_DB_USER}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_PASSWORD=%s\n" "${GUACAMOLE_DB_PASSWORD}" >> .guacamole.env
+    - printf "GUACAMOLE_IMAGE_TAG=%s\n" "${GUACAMOLE_IMAGE_TAG}" >> .guacamole.env
+    - docker compose --env-file .guacamole.env -f "${COMPOSE_FILE_PATH}" up -d
+    - docker compose --env-file .guacamole.env -f "${COMPOSE_FILE_PATH}" ps
+  environment:
+    name: guacamole-lab
+    url: http://localhost:${GUACAMOLE_HTTP_PORT}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never
+
+verify-guacamole:
+  stage: verify
+  script:
+    - ./scripts/wait-for-guacamole.sh "${GUACAMOLE_HTTP_PORT}"
+  needs:
+    - deploy-guacamole
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never
+
+stop-guacamole:
+  stage: cleanup
+  script:
+    - printf "GUACAMOLE_HTTP_PORT=%s\n" "${GUACAMOLE_HTTP_PORT}" > .guacamole.env
+    - printf "GUACAMOLE_DB_NAME=%s\n" "${GUACAMOLE_DB_NAME}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_USER=%s\n" "${GUACAMOLE_DB_USER}" >> .guacamole.env
+    - printf "GUACAMOLE_DB_PASSWORD=%s\n" "${GUACAMOLE_DB_PASSWORD}" >> .guacamole.env
+    - docker compose --env-file .guacamole.env -f "${COMPOSE_FILE_PATH}" down -v
+  when: manual
+  environment:
+    name: guacamole-lab
+    action: stop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+    - when: never
